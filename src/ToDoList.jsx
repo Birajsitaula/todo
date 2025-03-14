@@ -6,38 +6,32 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 const ToDoList = () => {
   const initialData = JSON.parse(localStorage.getItem("todoList")) || [];
 
-  const [todoList, settodoList] = useState([...initialData]);
+  const [todoList, setTodoList] = useState([...initialData]);
   const [text, setText] = useState("");
 
   const addTodo = () => {
-    settodoList([
+    if (!text.trim()) return;
+
+    const newTodoList = [
       ...todoList,
       {
         data: text,
         Date: new Date().toLocaleString().split(",")[0],
         isDone: false,
       },
-    ]);
+    ];
+
+    setTodoList(newTodoList);
+    localStorage.setItem("todoList", JSON.stringify(newTodoList));
     setText("");
-    localStorage.setItem(
-      "todoList",
-      JSON.stringify([
-        ...todoList,
-        {
-          data: text,
-          Date: new Date().toLocaleString().split(",")[0],
-          isDone: false,
-        },
-      ])
-    );
-    localStorage.setItem("text", "");
   };
 
   const toggleTodoCompletion = (idx) => {
     const newTodo = todoList.map((todo, index) =>
       index === idx ? { ...todo, isDone: !todo.isDone } : todo
     );
-    settodoList(newTodo);
+    setTodoList(newTodo);
+    localStorage.setItem("todoList", JSON.stringify(newTodo));
   };
 
   const remove = (idx) => {
@@ -45,13 +39,12 @@ const ToDoList = () => {
       "Are you sure you want to delete this todo?"
     );
     if (response) {
-      const newTodo = todoList.filter((_, index) => {
-        return index !== idx;
-      });
-      settodoList(newTodo);
+      const newTodo = todoList.filter((_, index) => index !== idx);
+      setTodoList(newTodo);
       localStorage.setItem("todoList", JSON.stringify(newTodo));
     }
   };
+
   return (
     <Container className="mb-3 text-center">
       <h1>Todo List App</h1>
@@ -64,44 +57,44 @@ const ToDoList = () => {
       />
       <br />
 
-      <Button onClick={addTodo}>
+      <Button onClick={addTodo} disabled={!text.trim()}>
         <FaPlus /> <label className="ms-2"> Add</label>
       </Button>
       <br />
       <br />
 
-      {todoList.length > 0
-        ? todoList.map((todo, index) => {
-            return (
-              <Row>
-                <Col xs={10}>
-                  <Alert
-                    variant={todo.isDone ? "danger" : "success"}
-                    className="text-start"
-                    style={{
-                      cursor: "pointer",
-                      textDecoration: todo.isDone ? "line-through" : "none",
-                    }}
-                    onClick={() => toggleTodoCompletion(index)}
-                  >
-                    {" "}
-                    {todo.data}
-                    <br />
-                    <small> {todo.Date} </small>
-                  </Alert>
-                </Col>
+      {todoList.length > 0 ? (
+        todoList.map((todo, index) => (
+          <Row key={index}>
+            <Col xs={10}>
+              <Alert
+                variant={todo.isDone ? "danger" : "success"}
+                className="text-start"
+                style={{
+                  cursor: "pointer",
+                  textDecoration: todo.isDone ? "line-through" : "none",
+                }}
+                onClick={() => toggleTodoCompletion(index)}
+              >
+                {todo.data}
+                <br />
+                <small> {todo.Date} </small>
+              </Alert>
+            </Col>
 
-                <Col className="mt-4">
-                  <FaTrash
-                    size="40"
-                    color="red"
-                    onClick={() => remove(index)}
-                  />
-                </Col>
-              </Row>
-            );
-          })
-        : "No todo list"}
+            <Col className="mt-4">
+              <FaTrash
+                size="40"
+                color="red"
+                onClick={() => remove(index)}
+                style={{ cursor: "pointer" }}
+              />
+            </Col>
+          </Row>
+        ))
+      ) : (
+        <Alert variant="info">No todo items</Alert>
+      )}
     </Container>
   );
 };
