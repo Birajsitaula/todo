@@ -1,11 +1,10 @@
+import ToDoList from "./ToDoList";
+
 function App() {
   return (
-    <>
-      <p style={{ backgroundColor: "red", color: "white" }}>
-        {" "}
-        The code is running{" "}
-      </p>
-    </>
+    <div>
+      <ToDoList />
+    </div>
   );
 }
 
